@@ -1,0 +1,8 @@
+/Example/enc_temp_folder/
+/Example/x64/
+/Example/Release/
+/Example/Debug/
+/Example/.vs/
+/Example/Config.json
+/Example/Program.vcxproj.user
+/include/rapidjson
