@@ -13,7 +13,7 @@ namespace Window {
 	extern bool Open;
 	int Thread();
 	bool Create();
-	void Update();
+	void UpdateTime(bool force = false);
 };
 
 int res_choice = -1;
@@ -29,6 +29,12 @@ void resolve_choice() {
 	}
 }
 
+void show_examples() {
+	std::cout
+		<< "Enter a command ID." << std::endl
+		<< "1.Toggle show time[" << booltxt(config.Interface.ShowTime) << "]" << std::endl;
+}
+
 int main() {
 	manager.file = "Config.json";
 	manager.load();
@@ -37,29 +43,23 @@ int main() {
 	std::thread(resolve_choice).detach();
 	std::thread wt(Window::Thread);
 	
+	show_examples();
+
 	while (Window::Open) {
-		// TODO: add more examples
-		std::cout
-			<< "Enter a command ID." << std::endl
-			<< "1.Toggle show time[" << booltxt(config.Interface.ShowTime) << "]" << std::endl;
-
-		while (res_choice == -1 && Window::Open);
-		if (!Window::Open) break;;
-
+		if (res_choice == -1) continue;
+		
 		int choice = res_choice;
 		res_choice = -1;
 
 		switch (choice) {
 		case 1:
 			config.Interface.ShowTime ^= 1;
+			Window::UpdateTime(true);
 			break;
 		}
 
-		if (config.modified()) manager.save();
-
-		Window::Update();
-
 		std::cout << std::endl;
+		show_examples();
 	}
 
 	wt.join();

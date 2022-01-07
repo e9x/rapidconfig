@@ -4,7 +4,7 @@
 
 RCCreateSection(MainConfig, {
 	RCAddSection(Window, {
-		RCAddNumberArray(Dimensions, { 10,10,200,200 });
+		RCAddNumberArray(Dimensions, { 10,10,300,200 });
 		RCAddNumber(LastOpen, -1);
 	});
 	RCAddSection(Interface, {

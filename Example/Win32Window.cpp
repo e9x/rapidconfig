@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <CommCtrl.h>
 #include <iostream>
+#include <thread>
 
 namespace Window {
 	bool Open = false;
@@ -46,20 +47,41 @@ namespace Window {
 
 		wc.lpszClassName = cls;
 		wc.lpfnWndProc = wndproc;
-
+		wc.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
+		wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
 		RegisterClassW(&wc);
 
 		return cls;
 	}
 
-	void Update() {
+	void UpdateOpen() {
+		double now = (double)time(0);
+
 		if (config.Window.LastOpen == -1) {
 			SetWindowTextW(last_open, L"This window wasn't opened before.");
 		}
 		else {
-			double now = (double)time(0);
-			std::wstring text = L"This window was opened " + std::to_wstring(now - config.Window.LastOpen) + L" seconds ago.";
+			std::wstring text = L"This window was last opened " + std::to_wstring(now - config.Window.LastOpen) + L" seconds ago.";
 			SetWindowTextW(last_open, text.c_str());
+		}
+
+		config.Window.LastOpen = now;
+	}
+
+	double last_time = 0;
+
+	void UpdateTime(bool force = false) {
+		double now = (double)time(0);
+
+		if (!force && last_time == now) return;
+		last_time = now;
+
+		if (config.Interface.ShowTime) {
+			std::wstring text = L"The time is " + std::to_wstring(now);
+			SetWindowTextW(current_time, text.c_str());
+		}
+		else {
+			SetWindowTextW(current_time, L"");
 		}
 	}
 
@@ -72,14 +94,11 @@ namespace Window {
 			return false;
 		}
 
-		last_open = CreateWindowExW(0, WC_STATICW, NULL, WS_CHILD | WS_VISIBLE, 10, 10, 100, 20, NULL, NULL, NULL, NULL);
+		last_open = CreateWindowExW(0, WC_STATICW, NULL, WS_CHILD | WS_VISIBLE, 10, 10, 400, 25, window, NULL, NULL, NULL);
+		current_time = CreateWindowExW(0, WC_STATICW, NULL, WS_CHILD | WS_VISIBLE, 10, 40, 400, 25, window, NULL, NULL, NULL);
 
-		if (window == NULL) {
-			std::cerr << "last_open was NULL. GLE was " << GetLastError() << std::endl;
-			return false;
-		}
-
-		Update();
+		UpdateOpen();
+		UpdateTime();
 
 		UpdateWindow(window);
 		ShowWindow(window, SW_SHOW);
@@ -89,12 +108,22 @@ namespace Window {
 
 	int Thread() {
 		Create();
+		bool run = true;
+
+		std::thread timet([&run]() {
+			while (run) {
+				UpdateTime();
+			}
+		});
 
 		MSG msg;
 		while (GetMessageW(&msg, NULL, NULL, NULL)) {
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
 		}
+
+		run = false;
+		timet.join();
 
 		return (int)msg.wParam;
 	}
