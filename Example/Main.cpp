@@ -10,7 +10,7 @@ const char* booltxt(bool b) {
 }
 
 namespace Window {
-	extern bool open;
+	extern bool Open;
 	int Thread();
 	bool Create();
 	void Update();
@@ -20,11 +20,10 @@ int main() {
 	manager.file = "Config.json";
 	manager.load();
 
-	if (!Window::Create()) return 1;
-
+	Window::Open = true; 
 	std::thread wt(Window::Thread);
-
-	while (Window::open) {
+	
+	while (Window::Open) {
 		// TODO: add more examples
 		std::cout
 			<< "Enter a command ID." << std::endl

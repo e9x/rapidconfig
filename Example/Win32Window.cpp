@@ -5,7 +5,7 @@
 #include <iostream>
 
 namespace Window {
-	bool open = false;
+	bool Open = false;
 
 	HWND window = NULL;
 	HWND last_open = NULL;
@@ -79,6 +79,8 @@ namespace Window {
 	}
 
 	int Thread() {
+		Create();
+
 		MSG msg;
 		while (GetMessageW(&msg, NULL, NULL, NULL)) {
 			TranslateMessage(&msg);
