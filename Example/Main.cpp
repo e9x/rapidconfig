@@ -16,11 +16,25 @@ namespace Window {
 	void Update();
 };
 
+int res_choice = -1;
+
+void resolve_choice() {
+	while (Window::Open) {
+		std::cin >> res_choice;
+
+		if (std::cin.fail()) {
+			std::cin.clear();
+			std::cin.ignore();
+		}
+	}
+}
+
 int main() {
 	manager.file = "Config.json";
 	manager.load();
 
 	Window::Open = true; 
+	std::thread(resolve_choice).detach();
 	std::thread wt(Window::Thread);
 	
 	while (Window::Open) {
@@ -28,10 +42,13 @@ int main() {
 		std::cout
 			<< "Enter a command ID." << std::endl
 			<< "1.Toggle show time[" << booltxt(config.Interface.ShowTime) << "]" << std::endl;
-		
-		int choice = 0;
-		std::cin >> choice;
-		
+
+		while (res_choice == -1 && Window::Open);
+		if (!Window::Open) break;;
+
+		int choice = res_choice;
+		res_choice = -1;
+
 		switch (choice) {
 		case 1:
 			config.Interface.ShowTime ^= 1;

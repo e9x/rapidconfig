@@ -11,20 +11,29 @@ namespace Window {
 	HWND last_open = NULL;
 	HWND current_time = NULL;
 
+	void update_dims() {
+		RECT rect;
+		GetWindowRect(window, &rect);
+
+		config.Window.Dimensions[0] = rect.left;
+		config.Window.Dimensions[1] = rect.top;
+		config.Window.Dimensions[2] = rect.right - rect.left;
+		config.Window.Dimensions[3] = rect.bottom - rect.top;
+	}
+
 	LRESULT wndproc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
 		switch (msg) {
 		case WM_MOVE:
-			config.Window.Dimensions[0] = LOWORD(lp);
-			config.Window.Dimensions[1] = HIWORD(lp);
+			update_dims();
 			break;
 		case WM_SIZE:
-			config.Window.Dimensions[2] = LOWORD(lp);
-			config.Window.Dimensions[3] = HIWORD(lp);
+			update_dims();
 			break;
 		case WM_CLOSE:
 			DestroyWindow(window);
 			break;
 		case WM_DESTROY:
+			Open = false;
 			PostQuitMessage(0);
 			break;
 		}
